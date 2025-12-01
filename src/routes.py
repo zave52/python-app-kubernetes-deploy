@@ -6,11 +6,11 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config import get_settings
-from src.database import get_db
-from src.models import User
-from src.schemas import UserCreate, UserUpdate, UserResponse
-from src.tools import (
+from config import get_settings
+from database import get_db
+from models import User
+from schemas import UserCreate, UserUpdate, UserResponse
+from tools import (
     get_password_hash,
     get_user_by_email,
     get_user_by_username,

@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.ext.declarative import declarative_base
 
-from src.config import get_settings
+from config import get_settings
 
 settings = get_settings()
 

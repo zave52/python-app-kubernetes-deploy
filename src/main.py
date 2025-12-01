@@ -5,10 +5,10 @@ from fastapi import FastAPI, HTTPException, status, Depends
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.config import get_settings
-from src.database import engine, get_db
-from src.models import Base
-from src.routes import router
+from config import get_settings
+from database import engine, get_db
+from models import Base
+from routes import router
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
