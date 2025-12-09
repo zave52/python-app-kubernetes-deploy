@@ -24,6 +24,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
+    {{- if .Values.ingress.hosts }}
     {{- range .Values.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
@@ -36,6 +37,17 @@ spec:
                 name: {{ include "python-api.fullname" $ }}
                 port:
                   number: {{ $.Values.service.port }}
-        {{- end }}
+          {{- end }}
+    {{- end }}
+    {{- else }}
+    - http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ include "python-api.fullname" . }}
+                port:
+                  number: {{ .Values.service.port }}
     {{- end }}
 {{- end }}
