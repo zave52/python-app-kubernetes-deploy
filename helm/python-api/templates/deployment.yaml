@@ -52,6 +52,18 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "python-api.fullname" . }}-config
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+              {{- if .Values.externalSecrets.enabled }}
+                  name: {{ include "python-api.fullname" . }}-postgres-secret
+              {{- else if .Values.postgresql.auth.existingSecret }}
+                  name: {{ .Values.postgresql.auth.existingSecret }}
+              {{- else }}
+                  name: {{ include "python-api.fullname" . }}-postgresql
+              {{- end }}
+                  key: password
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:

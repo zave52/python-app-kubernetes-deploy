@@ -1,0 +1,17 @@
+{{- if .Values.postgresql.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "python-api.fullname" . }}-postgres
+  labels:
+    {{- include "python-api.labels" . | nindent 4 }}
+    app.kubernetes.io/component: database
+spec:
+  type: ExternalName
+  externalName: {{ include "python-api.postgresqlHost" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  ports:
+    - port: {{ include "python-api.postgresqlPort" . }}
+      targetPort: {{ include "python-api.postgresqlPort" . }}
+      protocol: TCP
+      name: postgresql
+{{- end }}
