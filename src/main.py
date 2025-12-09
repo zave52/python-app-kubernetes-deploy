@@ -2,6 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, HTTPException, status, Depends
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +31,8 @@ app = FastAPI(
     description="Simple RESTful API for user management with PostgreSQL",
     lifespan=lifespan
 )
+
+Instrumentator().instrument(app).expose(app)
 
 
 @app.get("/health", tags=["health"])
