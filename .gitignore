@@ -266,3 +266,6 @@ poetry.toml
 pyrightconfig.json
 
 # End of https://www.toptal.com/developers/gitignore/api/python,pycharm+all,helm
+
+**/values-sensitive.yaml
+values-sensitive.yaml

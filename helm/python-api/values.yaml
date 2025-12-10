@@ -1,0 +1,159 @@
+nameOverride: ""
+fullnameOverride: ""
+
+replicaCount: 2
+
+rollingUpdate:
+  maxSurge: 1
+  maxUnavailable: 0
+
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE_NAME
+  pullPolicy: IfNotPresent
+  tag: "1.1.0"
+
+imagePullSecrets: []
+
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podLabels: {}
+
+podSecurityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 1000
+
+securityContext:
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false
+
+service:
+  type: ClusterIP
+  port: 8000
+  targetPort: 8000
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  hosts: []
+  tls: []
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8000
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8000
+  initialDelaySeconds: 10
+  periodSeconds: 5
+  timeoutSeconds: 3
+  failureThreshold: 3
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 75
+  targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+config:
+  logLevel: "INFO"
+  apiVersion: "v1"
+  apiPrefix: "/api/v1"
+
+postgresql:
+  enabled: true
+  auth:
+    username: apiuser
+    password: "changeme"
+    database: apidb
+  primary:
+    persistence:
+      enabled: true
+      size: 10Gi
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 256Mi
+
+externalSecrets:
+  enabled: false
+  secretStore:
+    provider: gcpsm
+    projectID: "PROJECT_ID"
+    clusterLocation: "us-central1"
+    clusterName: "gke-cluster"
+  secrets:
+    postgresPassword: "python-api-postgres-password"
+
+monitoring:
+  enabled: false
+
+ingressNginx:
+  enabled: false
+
+kube-prometheus-stack:
+  prometheus:
+    prometheusSpec:
+      serviceMonitorSelectorNilUsesHelmValues: false
+      podMonitorSelectorNilUsesHelmValues: false
+      retention: 7d
+  grafana:
+    adminPassword: changeme
+    service:
+      type: LoadBalancer
+    sidecar:
+      dashboards:
+        enabled: true
+        label: grafana_dashboard
+        labelValue: "1"
+        searchNamespace: ALL
+        folder: /var/lib/grafana/dashboards
+        defaultFolderName: "Python API"
+  alertmanager:
+    enabled: true
+
+ingress-nginx:
+  controller:
+    service:
+      type: LoadBalancer
+    metrics:
+      enabled: true
+      serviceMonitor:
+        enabled: true

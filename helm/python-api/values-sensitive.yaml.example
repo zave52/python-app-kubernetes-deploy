@@ -1,0 +1,30 @@
+image:
+  repository: REGION-docker.pkg.dev/PROJECT_ID/REPOSITORY/IMAGE_NAME
+  tag: "1.0.0"
+
+postgresql:
+  auth:
+    password: "your-postgres-password-here"
+
+externalSecrets:
+  enabled: false
+  secretStore:
+    projectID: "your-gcp-project-id"
+    clusterLocation: "us-central1-a"
+    clusterName: "your-cluster-name"
+  secrets:
+    postgresPassword: "python-api-postgres-password"
+
+serviceAccount:
+  annotations:
+    iam.gke.io/gcp-service-account: SERVICE_ACCOUNT_NAME@PROJECT_ID.iam.gserviceaccount.com
+
+ingressNginx:
+  enabled: true
+
+monitoring:
+  enabled: true
+
+kube-prometheus-stack:
+  grafana:
+    adminPassword: "your-grafana-password-here"
