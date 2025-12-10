@@ -1,0 +1,70 @@
+{{- if .Values.monitoring.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: {{ include "python-api.fullname" . }}-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "python-api.labels" . | nindent 4 }}
+    release: {{ .Release.Name }}
+spec:
+  groups:
+    - name: python-api.rules
+      interval: 30s
+      rules:
+        - alert: PythonAPIHighErrorRate
+          expr: |
+            rate(http_requests_total{job="{{ include "python-api.fullname" . }}",status=~"5.."}[5m]) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            component: python-api
+          annotations:
+            summary: "High error rate detected on Python API"
+
+        - alert: PythonAPIHighResponseTime
+          expr: |
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="{{ include "python-api.fullname" . }}"}[5m])) > 1
+          for: 5m
+          labels:
+            severity: warning
+            component: python-api
+          annotations:
+            summary: "High response time detected on Python API"
+
+        - alert: PythonAPIPodDown
+          expr: |
+            up{job="{{ include "python-api.fullname" . }}"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            component: python-api
+          annotations:
+            summary: "Python API pod is down"
+
+        - alert: PythonAPIHighMemoryUsage
+          expr: |
+            container_memory_usage_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "python-api.fullname" . }}-.*"}
+            /
+            container_spec_memory_limit_bytes{namespace="{{ .Release.Namespace }}",pod=~"{{ include "python-api.fullname" . }}-.*"}
+            > 0.9
+          for: 5m
+          labels:
+            severity: warning
+            component: python-api
+          annotations:
+            summary: "Python API pod using more than 90% memory"
+
+        - alert: PythonAPIHighCPUUsage
+          expr: |
+            rate(container_cpu_usage_seconds_total{namespace="{{ .Release.Namespace }}",pod=~"{{ include "python-api.fullname" . }}-.*"}[5m])
+            /
+            container_spec_cpu_quota{namespace="{{ .Release.Namespace }}",pod=~"{{ include "python-api.fullname" . }}-.*"}
+            * 100000 > 90
+          for: 5m
+          labels:
+            severity: warning
+            component: python-api
+          annotations:
+            summary: "Python API pod using more than 90% CPU"
+{{- end }}
